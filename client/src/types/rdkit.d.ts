@@ -17,7 +17,3 @@ declare module "rdkit" {
   ): Promise<RDKitModule>;
 }
 
-declare module "rdkit/rdkit.wasm?url" {
-  const url: string;
-  export default url;
-}

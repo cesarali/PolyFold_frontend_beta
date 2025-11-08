@@ -1,6 +1,5 @@
 import { type CSSProperties, useEffect, useState } from "react";
 import initRDKitModule, { type RDKitModule } from "rdkit";
-import rdkitWasmUrl from "rdkit/rdkit.wasm?url";
 
 type RDKitMol = {
   get_svg: (options?: Record<string, unknown>) => string;
@@ -8,13 +7,14 @@ type RDKitMol = {
 };
 
 let rdkitPromise: Promise<RDKitModule> | null = null;
+const rdkitWasmBase = "https://unpkg.com/rdkit@2024.3.5/dist/";
 
 function loadRDKit(): Promise<RDKitModule> {
   if (!rdkitPromise) {
     rdkitPromise = initRDKitModule({
       locateFile: (file: string) => {
         if (file.endsWith(".wasm")) {
-          return rdkitWasmUrl;
+          return `${rdkitWasmBase}${file}`;
         }
         return file;
       },
