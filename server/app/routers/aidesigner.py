@@ -15,6 +15,15 @@ router = APIRouter()
 CSV_FILENAME = "PI1M_sample.csv"
 STATIC_DIR = Path(__file__).resolve().parent.parent / "static"
 
+TARGET_PROPERTIES: Dict[str, str] = {
+    "deltaE_kJmol": "ΔE (kJ/mol)",
+    "Mw": "Mw (g/mol)",
+    "LogP": "LogP",
+    "TPSA": "TPSA (Å²)",
+    "NumRings": "NumRings",
+    "NumRotatableBonds": "NumRotatableBonds",
+}
+
 
 def _load_dataset_rows() -> List[Dict[str, str]]:
     dataset_path = STATIC_DIR / CSV_FILENAME
@@ -31,67 +40,52 @@ def _load_dataset_rows() -> List[Dict[str, str]]:
     return rows
 
 
-def _first_matching_value(row: Dict[str, str], keywords: Iterable[str]) -> str | None:
-    for key, value in row.items():
+def _extract_candidate(row: Dict[str, str]) -> Dict[str, object]:
+    smiles = None
+    for value in row.values():
         if value is None:
             continue
-        key_lower = key.strip().lower()
-        if any(keyword in key_lower for keyword in keywords):
-            stripped = value.strip()
-            if stripped:
-                return stripped
-    return None
+        stripped = value.strip()
+        if stripped:
+            smiles = stripped
+            break
 
-
-def _extract_candidate(row: Dict[str, str]) -> Dict[str, object]:
-    monomer_smiles = _first_matching_value(row, ["monomer", "monomer_smiles", "building_block_a"])
-    linker_smiles = _first_matching_value(row, ["linker", "linker_smiles", "building_block_b"])
-
-    if monomer_smiles is None and linker_smiles is None:
-        # Fall back to any SMILES-like column name.
-        fallback_smiles = _first_matching_value(row, ["smiles", "smile"])
-        monomer_smiles = fallback_smiles
-        linker_smiles = fallback_smiles
-
-    estimated_delta_e = _first_matching_value(row, ["deltae", "energy", "kjmol"])
-
-    try:
-        estimated_delta_e_value = float(estimated_delta_e) if estimated_delta_e is not None else None
-    except ValueError:
-        estimated_delta_e_value = None
-
-    def _structure_payload(smiles: str | None) -> Dict[str, str | None]:
+    def _structure_payload(structure_smiles: str | None) -> Dict[str, str | None]:
         return {
             "inchikey": f"IK_{uuid.uuid4().hex[:10]}",
-            "smiles": smiles,
+            "smiles": structure_smiles,
         }
 
     return {
-        "monomer": _structure_payload(monomer_smiles),
-        "linker": _structure_payload(linker_smiles),
-        "estimated_deltaE_kJmol": estimated_delta_e_value,
+        "monomer": _structure_payload(smiles),
+        "linker": _structure_payload(None),
+        "estimated_deltaE_kJmol": None,
     }
 
 
 def _summarize_targets(targets: Iterable[Dict[str, object]]) -> List[Dict[str, object]]:
-    aggregated: Dict[str, float] = {}
-    for target in targets:
-        kind = str(target.get("kind", "")).strip()
-        if not kind:
-            continue
-        try:
-            value = float(target.get("value"))
-        except (TypeError, ValueError):
-            continue
-        aggregated[kind] = aggregated.get(kind, 0.0) + value
+    summaries: List[Dict[str, object]] = []
 
-    summaries = []
-    for kind, total in aggregated.items():
-        summaries.append({
-            "kind": kind,
-            "sum": total,
-            "doubled": total * 2,
-        })
+    for key in TARGET_PROPERTIES:
+        total = 0.0
+        seen_value = False
+
+        for target in targets:
+            if str(target.get("kind", "")).strip() != key:
+                continue
+            try:
+                value = float(target.get("value"))
+            except (TypeError, ValueError):
+                continue
+            total += value
+            seen_value = True
+
+        if seen_value:
+            summaries.append({
+                "kind": key,
+                "sum": total,
+                "doubled": total * 2,
+            })
 
     return summaries
 
