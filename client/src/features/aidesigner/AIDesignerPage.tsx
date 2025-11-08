@@ -31,6 +31,7 @@ function SmilesVisualization() {
         height: "100%",
         minHeight: 0,
         flex: "1 1 auto",
+        overflow: "hidden",
       }}
     >
       <div>
@@ -51,7 +52,7 @@ function SmilesVisualization() {
           {result.template || "—"}
         </code>
       </div>
-      <div style={{ display: "grid", gridTemplateRows: "auto 1fr", minHeight: 0 }}>
+      <div style={{ display: "grid", gridTemplateRows: "auto 1fr", minHeight: 0, overflow: "hidden" }}>
         <div style={{ fontSize: "12px", textTransform: "uppercase", color: "var(--muted)", marginBottom: "4px" }}>
           Candidate combinations
         </div>
@@ -178,13 +179,22 @@ function EnergiesPropertiesPanel() {
 
 export default function AIDesignerPage() {
   return (
-    <div style={{ display: "grid", gridTemplateRows: "minmax(0, 1fr) 260px", gap: "12px", height: "100%" }}>
+    <div
+      style={{
+        display: "grid",
+        gridTemplateRows: "minmax(0, 1fr) 260px",
+        gap: "12px",
+        height: "100%",
+        minHeight: 0,
+      }}
+    >
       <div
         className="panel"
         style={{
           overflow: "hidden",
           display: "grid",
           gridTemplateRows: "40px 1fr",
+          minHeight: 0,
         }}
       >
         <div

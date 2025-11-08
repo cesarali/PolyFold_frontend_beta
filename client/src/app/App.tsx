@@ -25,7 +25,7 @@ export default function App() {
           )}
         </aside>
 
-        <main className="panel" style={{overflow:"hidden", display:"grid"}}>
+        <main className="panel" style={{overflow:"hidden", display:"grid", minHeight:"0"}}>
           <Outlet />
         </main>
 
