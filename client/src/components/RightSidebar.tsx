@@ -7,7 +7,7 @@ import Copilot from "./copilot/Copilot";
 export default function RightSidebar() {
   const { pathname } = useLocation();
 
-  // Treat "/" as Literature by default, and accept both "literature" and "literature-review"
+  // treat "/" as literature; handle both "literature" and "literature-review"
   const isLit = pathname === "/" || pathname.startsWith("/literature") || pathname.startsWith("/literature-review");
   const isAI  = pathname.startsWith("/ai-designer");
   const isPE  = pathname.startsWith("/physics") || pathname.startsWith("/physics-engine");

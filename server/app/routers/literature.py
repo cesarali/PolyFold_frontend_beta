@@ -26,9 +26,6 @@ def list_pdfs():
 
 @router.get("/pdfs/{source_id}/content")
 def pdf_content(source_id: str):
-    """
-    Uploaded IDs look like 'uploaded_upload_<hash>'; map to /static/upload_<hash>.pdf
-    """
     if source_id.startswith("uploaded_"):
         stem = source_id.replace("uploaded_", "")  # 'upload_<hash>'
         fpath = STATIC / f"{stem}.pdf"
@@ -36,8 +33,6 @@ def pdf_content(source_id: str):
             return FileResponse(
                 fpath, media_type="application/pdf", filename=fpath.name
             )
-        raise HTTPException(status_code=404, detail="Uploaded PDF not found")
-    # fallback for mock DOIs
     return FileResponse(
         STATIC / "sample.pdf", media_type="application/pdf", filename="sample.pdf"
     )

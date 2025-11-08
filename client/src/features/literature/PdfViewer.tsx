@@ -6,16 +6,19 @@ import { useEffect, useMemo, useState } from "react";
 pdfjs.GlobalWorkerOptions.workerSrc = workerSrc;
 
 export default function PdfViewer() {
-  const { currentSourceId } = useSession();
+  const currentSourceId = useSession(s => s.currentSourceId);
   const [numPages, setNumPages] = useState<number>(0);
   const [page, setPage] = useState<number>(1);
   const [docError, setDocError] = useState<string | null>(null);
 
-  const url = useMemo(() => (
-    currentSourceId ? `/api/literature/pdfs/${currentSourceId}/content` : null
-  ), [currentSourceId]);
+  const url = useMemo(() =>
+    currentSourceId ? `/api/literature/pdfs/${currentSourceId}/content` : null,
+  [currentSourceId]);
 
-  useEffect(() => { setDocError(null); setPage(1); setNumPages(0); }, [url]);
+  useEffect(() => {
+    setDocError(null); setPage(1); setNumPages(0);
+    if (url) console.log("[PDF] viewer loading:", url);
+  }, [url]);
 
   if (!url) {
     return <div style={{padding:"12px", color:"var(--muted)"}}>Pick or upload a PDF from the right panel.</div>;
@@ -33,15 +36,16 @@ export default function PdfViewer() {
         {docError ? (
           <>
             <div style={{padding:12, color:"var(--muted)"}}>
-              Viewer had trouble rendering: <code>{docError}</code>. Falling back to inline preview…
+              Viewer error: <code>{docError}</code> — falling back to inline preview.
             </div>
             <iframe title="pdf-fallback" src={url} style={{width:"100%", height:"80vh", border:"0"}} />
           </>
         ) : (
           <Document
             file={url}
-            onLoadSuccess={(e)=> setNumPages(e.numPages)}
-            onLoadError={(e)=> setDocError(String(e))}
+            onLoadSuccess={(e)=> { console.log("[PDF] loaded pages:", e.numPages); setNumPages(e.numPages); }}
+            onSourceError={(e)=> { console.error("[PDF] source error", e); setDocError(String(e)); }}
+            onLoadError={(e)=> { console.error("[PDF] load error", e); setDocError(String(e)); }}
             loading={<div style={{padding:12}}>Loading PDF…</div>}
             error=""
             noData={<div style={{padding:12}}>No PDF data received.</div>}
