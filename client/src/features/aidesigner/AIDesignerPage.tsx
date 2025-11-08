@@ -91,12 +91,58 @@ function SmilesVisualization() {
 
 function EnergiesPropertiesPanel() {
   const { result } = useDesigner();
-  const targets = result?.targets ?? [];
+  const summaries = Array.isArray(result?.property_summary) ? result?.property_summary : [];
+  const fallbackTargets = Array.isArray(result?.submittedTargets)
+    ? result?.submittedTargets
+    : Array.isArray(result?.targets)
+    ? result?.targets
+    : [];
+
+  const formatNumber = (value: any) => {
+    if (typeof value === "number" && Number.isFinite(value)) {
+      const formatted = value.toFixed(3);
+      return formatted.replace(/\.0+$/, "").replace(/(\.\d+?)0+$/, "$1");
+    }
+    return value ?? "—";
+  };
 
   return (
     <div className="panel" style={{ overflow: "auto", padding: "10px" }}>
       <h3 style={{ marginTop: 0 }}>Energies / Properties</h3>
-      {targets.length > 0 ? (
+      {summaries.length > 0 ? (
+        <table className="table">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Sum</th>
+              <th>x2</th>
+              <th>Units</th>
+              <th>Samples</th>
+            </tr>
+          </thead>
+          <tbody>
+            {summaries.map((summary: any, idx: number) => {
+              const meta = PROPERTY_METADATA[summary.kind] || {
+                name: summary.kind,
+                units: "—",
+                context: "Target",
+              };
+
+              const samples = summary.count ? summary.count : "—";
+
+              return (
+                <tr key={`${summary.kind}-${idx}`}>
+                  <td>{meta.name}</td>
+                  <td>{formatNumber(summary.sum)}</td>
+                  <td>{formatNumber(summary.double)}</td>
+                  <td>{meta.units}</td>
+                  <td>{samples}</td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      ) : fallbackTargets.length > 0 ? (
         <table className="table">
           <thead>
             <tr>
@@ -107,7 +153,7 @@ function EnergiesPropertiesPanel() {
             </tr>
           </thead>
           <tbody>
-            {targets.map((target: { kind: string; value: number }, idx: number) => {
+            {fallbackTargets.map((target: { kind: string; value: number }, idx: number) => {
               const meta = PROPERTY_METADATA[target.kind] || {
                 name: target.kind,
                 units: "—",

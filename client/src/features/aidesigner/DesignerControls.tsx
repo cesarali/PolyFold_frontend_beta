@@ -49,7 +49,7 @@ export default function DesignerControls() {
         })
       ),
     onSuccess: (r, payload) => {
-      setResult({ ...r, targets: payload.targets, template: payload.template });
+      setResult({ ...r, template: payload.template, submittedTargets: payload.targets });
     },
   });
 
