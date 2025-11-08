@@ -35,7 +35,21 @@ def _load_smiles() -> List[str]:
 
     with csv_path.open(newline="", encoding="utf-8") as handle:
         reader = csv.DictReader(handle)
-        _SMILES_CACHE = [row["smiles"].strip() for row in reader if row.get("smiles")]
+        field_name = None
+        if reader.fieldnames:
+            for name in reader.fieldnames:
+                if name and name.lower().strip() == "smiles":
+                    field_name = name
+                    break
+
+        if field_name is None:
+            raise HTTPException(status_code=500, detail="'smiles' column missing in PI1M_sample.csv")
+
+        _SMILES_CACHE = [
+            row[field_name].strip()
+            for row in reader
+            if row.get(field_name)
+        ]
 
     if not _SMILES_CACHE:
         raise HTTPException(status_code=500, detail="No SMILES entries available")

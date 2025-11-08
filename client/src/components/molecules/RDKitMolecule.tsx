@@ -75,6 +75,7 @@ export default function RDKitMolecule({ smiles }: Props) {
       })
       .catch((err) => {
         console.error("Failed to initialise RDKit", err);
+        rdkitPromise = null;
         if (!cancelled) {
           setError("RDKit module unavailable");
         }

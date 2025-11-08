@@ -27,13 +27,30 @@ export default function ProposalsBody() {
       </div>
     );
 
-  const candidates = result.candidates ?? [];
+  const candidates = Array.isArray(result.candidates) ? result.candidates : [];
+  const template = result.template;
+
+  if (!candidates.length) {
+    return (
+      <div style={{ padding: "12px", display: "grid", gap: "12px" }}>
+        <div style={{ color: "var(--muted)" }}>
+          No proposals were returned. Adjust the target on the right and try again.
+        </div>
+        {template ? (
+          <div style={{ fontSize: "0.9rem", color: "var(--muted)" }}>
+            Last template submitted: <code>{template}</code>
+          </div>
+        ) : null}
+      </div>
+    );
+  }
 
   return (
     <div style={{ padding: "12px" }}>
       <h3 style={{ marginTop: 0, marginBottom: "12px" }}>Proposed candidates</h3>
       {candidates.map((candidate: any, i: number) => {
         const smiles = candidate?.monomer?.smiles ?? "";
+        const linker = candidate?.linker?.smiles;
         const properties = candidate?.properties ?? {};
         return (
           <div
@@ -47,8 +64,13 @@ export default function ProposalsBody() {
               gap: "12px",
             }}
           >
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-              <code style={{ fontSize: "0.9rem" }}>{smiles || "(no SMILES)"}</code>
+            <div style={{ display: "flex", flexWrap: "wrap", gap: "8px", justifyContent: "space-between" }}>
+              <div style={{ display: "grid", gap: "4px" }}>
+                <code style={{ fontSize: "0.9rem" }}>{smiles || "(no SMILES)"}</code>
+                {linker ? (
+                  <code style={{ fontSize: "0.8rem", color: "var(--muted)" }}>Linker: {linker}</code>
+                ) : null}
+              </div>
               <span style={{ color: "var(--muted)", fontSize: "0.9rem" }}>
                 ΔE ≈ {candidate?.estimated_deltaE_kJmol ?? "—"} kJ/mol
               </span>
