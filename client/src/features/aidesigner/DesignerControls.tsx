@@ -48,8 +48,8 @@ export default function DesignerControls() {
           body: JSON.stringify(payload),
         })
       ),
-    onSuccess: (r, payload) => {
-      setResult({ ...r, targets: payload.targets, template: payload.template });
+    onSuccess: (r) => {
+      setResult(r);
     },
   });
 

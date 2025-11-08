@@ -31,17 +31,28 @@ function SmilesVisualization() {
         height: "100%",
         minHeight: 0,
         flex: "1 1 auto",
+        overflow: "hidden",
       }}
     >
       <div>
         <div style={{ fontSize: "12px", textTransform: "uppercase", color: "var(--muted)", marginBottom: "4px" }}>
           Template SMILES
         </div>
-        <code style={{ display: "block", padding: "12px", background: "var(--surface-muted)", borderRadius: "6px" }}>
+        <code
+          style={{
+            display: "block",
+            padding: "12px",
+            background: "var(--surface-muted)",
+            borderRadius: "6px",
+            maxWidth: "100%",
+            overflow: "auto",
+            whiteSpace: "pre",
+          }}
+        >
           {result.template || "—"}
         </code>
       </div>
-      <div style={{ display: "grid", gridTemplateRows: "auto 1fr", minHeight: 0 }}>
+      <div style={{ display: "grid", gridTemplateRows: "auto 1fr", minHeight: 0, overflow: "hidden" }}>
         <div style={{ fontSize: "12px", textTransform: "uppercase", color: "var(--muted)", marginBottom: "4px" }}>
           Candidate combinations
         </div>
@@ -68,11 +79,29 @@ function SmilesVisualization() {
               <div style={{ display: "grid", gap: "4px" }}>
                 <div>
                   <span style={{ color: "var(--muted)", fontSize: "12px" }}>Monomer</span>
-                  <code style={{ display: "block" }}>{candidate.monomer?.smiles || "—"}</code>
+                  <code
+                    style={{
+                      display: "block",
+                      maxWidth: "100%",
+                      overflow: "auto",
+                      whiteSpace: "pre",
+                    }}
+                  >
+                    {candidate.monomer?.smiles || "—"}
+                  </code>
                 </div>
                 <div>
                   <span style={{ color: "var(--muted)", fontSize: "12px" }}>Linker</span>
-                  <code style={{ display: "block" }}>{candidate.linker?.smiles || "—"}</code>
+                  <code
+                    style={{
+                      display: "block",
+                      maxWidth: "100%",
+                      overflow: "auto",
+                      whiteSpace: "pre",
+                    }}
+                  >
+                    {candidate.linker?.smiles || "—"}
+                  </code>
                 </div>
                 <div style={{ color: "var(--muted)", fontSize: "12px" }}>
                   Estimated ΔE ≈ {candidate.estimated_deltaE_kJmol ?? "—"} kJ/mol
@@ -91,32 +120,44 @@ function SmilesVisualization() {
 
 function EnergiesPropertiesPanel() {
   const { result } = useDesigner();
-  const targets = result?.targets ?? [];
+  const summaries = Array.isArray(result?.property_summary) ? result?.property_summary : [];
+
+  const formatNumber = (value: unknown) => {
+    if (typeof value === "number" && Number.isFinite(value)) {
+      return value.toLocaleString(undefined, { maximumFractionDigits: 3 });
+    }
+    if (value === null || value === undefined || value === "") {
+      return "—";
+    }
+    return String(value);
+  };
 
   return (
     <div className="panel" style={{ overflow: "auto", padding: "10px" }}>
       <h3 style={{ marginTop: 0 }}>Energies / Properties</h3>
-      {targets.length > 0 ? (
+      {summaries.length > 0 ? (
         <table className="table">
           <thead>
             <tr>
               <th>Name</th>
-              <th>Value</th>
+              <th>Sum</th>
+              <th>Doubled</th>
               <th>Units</th>
               <th>Context</th>
             </tr>
           </thead>
           <tbody>
-            {targets.map((target: { kind: string; value: number }, idx: number) => {
-              const meta = PROPERTY_METADATA[target.kind] || {
-                name: target.kind,
+            {summaries.map((summary: { kind: string; sum: number; doubled: number }, idx: number) => {
+              const meta = PROPERTY_METADATA[summary.kind] || {
+                name: summary.kind,
                 units: "—",
                 context: "Target",
               };
               return (
-                <tr key={`${target.kind}-${idx}`}>
+                <tr key={`${summary.kind}-${idx}`}>
                   <td>{meta.name}</td>
-                  <td>{target.value}</td>
+                  <td>{formatNumber(summary.sum)}</td>
+                  <td>{formatNumber(summary.doubled)}</td>
                   <td>{meta.units}</td>
                   <td>{meta.context}</td>
                 </tr>
@@ -125,7 +166,7 @@ function EnergiesPropertiesPanel() {
           </tbody>
         </table>
       ) : (
-        <div style={{ color: "var(--muted)" }}>No property targets submitted yet.</div>
+        <div style={{ color: "var(--muted)" }}>No property summaries available yet.</div>
       )}
       {result?.run && (
         <div style={{ color: "var(--muted)", marginTop: "8px" }}>
@@ -138,13 +179,22 @@ function EnergiesPropertiesPanel() {
 
 export default function AIDesignerPage() {
   return (
-    <div style={{ display: "grid", gridTemplateRows: "minmax(0, 1fr) 260px", gap: "12px", height: "100%" }}>
+    <div
+      style={{
+        display: "grid",
+        gridTemplateRows: "minmax(0, 1fr) 260px",
+        gap: "12px",
+        height: "100%",
+        minHeight: 0,
+      }}
+    >
       <div
         className="panel"
         style={{
           overflow: "hidden",
           display: "grid",
           gridTemplateRows: "40px 1fr",
+          minHeight: 0,
         }}
       >
         <div
@@ -164,6 +214,7 @@ export default function AIDesignerPage() {
             display: "grid",
             gridTemplateColumns: "minmax(0, 1fr)",
             minHeight: 0,
+            height: "100%",
           }}
         >
           <div
@@ -175,6 +226,8 @@ export default function AIDesignerPage() {
               minHeight: 0,
               display: "flex",
               flexDirection: "column",
+              height: "100%",
+              overflow: "hidden",
             }}
           >
             <SmilesVisualization />
