@@ -37,7 +37,17 @@ function SmilesVisualization() {
         <div style={{ fontSize: "12px", textTransform: "uppercase", color: "var(--muted)", marginBottom: "4px" }}>
           Template SMILES
         </div>
-        <code style={{ display: "block", padding: "12px", background: "var(--surface-muted)", borderRadius: "6px" }}>
+        <code
+          style={{
+            display: "block",
+            padding: "12px",
+            background: "var(--surface-muted)",
+            borderRadius: "6px",
+            maxWidth: "100%",
+            overflow: "auto",
+            whiteSpace: "pre",
+          }}
+        >
           {result.template || "—"}
         </code>
       </div>
@@ -68,11 +78,29 @@ function SmilesVisualization() {
               <div style={{ display: "grid", gap: "4px" }}>
                 <div>
                   <span style={{ color: "var(--muted)", fontSize: "12px" }}>Monomer</span>
-                  <code style={{ display: "block" }}>{candidate.monomer?.smiles || "—"}</code>
+                  <code
+                    style={{
+                      display: "block",
+                      maxWidth: "100%",
+                      overflow: "auto",
+                      whiteSpace: "pre",
+                    }}
+                  >
+                    {candidate.monomer?.smiles || "—"}
+                  </code>
                 </div>
                 <div>
                   <span style={{ color: "var(--muted)", fontSize: "12px" }}>Linker</span>
-                  <code style={{ display: "block" }}>{candidate.linker?.smiles || "—"}</code>
+                  <code
+                    style={{
+                      display: "block",
+                      maxWidth: "100%",
+                      overflow: "auto",
+                      whiteSpace: "pre",
+                    }}
+                  >
+                    {candidate.linker?.smiles || "—"}
+                  </code>
                 </div>
                 <div style={{ color: "var(--muted)", fontSize: "12px" }}>
                   Estimated ΔE ≈ {candidate.estimated_deltaE_kJmol ?? "—"} kJ/mol
@@ -176,6 +204,7 @@ export default function AIDesignerPage() {
             display: "grid",
             gridTemplateColumns: "minmax(0, 1fr)",
             minHeight: 0,
+            height: "100%",
           }}
         >
           <div
@@ -187,6 +216,8 @@ export default function AIDesignerPage() {
               minHeight: 0,
               display: "flex",
               flexDirection: "column",
+              height: "100%",
+              overflow: "hidden",
             }}
           >
             <SmilesVisualization />
