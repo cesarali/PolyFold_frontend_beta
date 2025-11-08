@@ -8,7 +8,16 @@ declare module "rdkit" {
     get_mol: (smiles: string) => RDKitMolecule;
   };
 
+  export type RDKitInitOptions = Record<string, unknown> & {
+    locateFile?: (file: string) => string;
+  };
+
   export default function initRDKitModule(
-    options?: Record<string, unknown>
+    options?: RDKitInitOptions
   ): Promise<RDKitModule>;
+}
+
+declare module "rdkit/rdkit.wasm?url" {
+  const url: string;
+  export default url;
 }
