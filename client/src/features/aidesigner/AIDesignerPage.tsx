@@ -1,0 +1,1 @@
+import ProposalsBody from './ProposalsBody'; export default function AIDesignerPage(){ return (<div className='panel' style={{overflow:'auto'}}><ProposalsBody/></div>);}

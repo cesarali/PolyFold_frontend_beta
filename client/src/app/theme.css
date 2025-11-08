@@ -1,0 +1,18 @@
+:root {
+  --bg: #0e1116;
+  --bg-elev: #121721;
+  --panel: #161b22;
+  --text: #e3e7ee;
+  --muted: #9aa4b2;
+  --accent: #7ea1c4;
+  --accent-2: #9bb6cf;
+  --border: #1f2633;
+  --danger: #ff6b6b;
+  --success: #32d296;
+}
+*{box-sizing:border-box} html,body,#root{height:100%;margin:0;background:var(--bg);color:var(--text);font-family:Inter,system-ui,Segoe UI,Roboto,Ubuntu,Cantarell,'Helvetica Neue','Noto Sans','Apple Color Emoji','Segoe UI Emoji',sans-serif}
+a{color:var(--accent);text-decoration:none} a.active{color:var(--accent-2)}
+.panel{background:var(--panel);border:1px solid var(--border);border-radius:10px}
+.btn{background:transparent;color:var(--text);border:1px solid var(--border);padding:6px 10px;border-radius:8px;cursor:pointer}
+.btn:hover{border-color:var(--accent)} .input{background:transparent;color:var(--text);border:1px solid var(--border);padding:8px;border-radius:8px}
+.table{width:100%;border-collapse:collapse}.table th,.table td{padding:6px 8px;border-bottom:1px solid var(--border)} .table th{text-align:left;color:var(--muted);font-weight:600}

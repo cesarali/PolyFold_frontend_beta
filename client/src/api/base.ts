@@ -1,0 +1,1 @@
+export async function j<T>(res: Response): Promise<T> { if (!res.ok) throw new Error(await res.text()||res.statusText); return res.json() as Promise<T>; }

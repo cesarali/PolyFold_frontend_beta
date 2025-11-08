@@ -1,0 +1,1 @@
+import { create } from 'zustand'; export const useDesigner = create((set)=>({result:null,setResult:(r:any)=>set({result:r})}));

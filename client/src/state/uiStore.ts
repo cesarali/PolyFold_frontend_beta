@@ -1,0 +1,1 @@
+import { create } from 'zustand'; export const useUI = create((set)=>({leftOpen:true,rightOpen:true,toggleLeft:()=>set((s:any)=>({leftOpen:!s.leftOpen})),toggleRight:()=>set((s:any)=>({rightOpen:!s.rightOpen}))}));
