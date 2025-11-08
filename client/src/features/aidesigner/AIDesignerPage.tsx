@@ -1,4 +1,3 @@
-import ProposalsBody from "./ProposalsBody";
 import { useDesigner } from "../../state/designerStore";
 
 const PROPERTY_METADATA: Record<string, { name: string; units: string; context: string }> = {
@@ -24,7 +23,16 @@ function SmilesVisualization() {
   const candidates = Array.isArray(result.candidates) ? result.candidates : [];
 
   return (
-    <div style={{ display: "grid", gap: "12px" }}>
+    <div
+      style={{
+        display: "grid",
+        gap: "12px",
+        gridTemplateRows: "auto 1fr",
+        height: "100%",
+        minHeight: 0,
+        flex: "1 1 auto",
+      }}
+    >
       <div>
         <div style={{ fontSize: "12px", textTransform: "uppercase", color: "var(--muted)", marginBottom: "4px" }}>
           Template SMILES
@@ -33,7 +41,7 @@ function SmilesVisualization() {
           {result.template || "—"}
         </code>
       </div>
-      <div>
+      <div style={{ display: "grid", gridTemplateRows: "auto 1fr", minHeight: 0 }}>
         <div style={{ fontSize: "12px", textTransform: "uppercase", color: "var(--muted)", marginBottom: "4px" }}>
           Candidate combinations
         </div>
@@ -41,7 +49,7 @@ function SmilesVisualization() {
           style={{
             display: "grid",
             gap: "8px",
-            maxHeight: "180px",
+            minHeight: 0,
             overflow: "auto",
             paddingRight: "4px",
           }}
@@ -154,8 +162,7 @@ export default function AIDesignerPage() {
           style={{
             padding: "12px",
             display: "grid",
-            gridTemplateColumns: "minmax(0, 1fr) 320px",
-            gap: "16px",
+            gridTemplateColumns: "minmax(0, 1fr)",
             minHeight: 0,
           }}
         >
@@ -166,13 +173,11 @@ export default function AIDesignerPage() {
               padding: "12px",
               background: "var(--surface)",
               minHeight: 0,
-              overflow: "hidden",
+              display: "flex",
+              flexDirection: "column",
             }}
           >
             <SmilesVisualization />
-          </div>
-          <div style={{ minHeight: 0, overflow: "auto", borderLeft: "1px solid var(--border)", paddingLeft: "12px" }}>
-            <ProposalsBody />
           </div>
         </div>
       </div>
