@@ -1,1 +1,11 @@
-import { create } from 'zustand'; export const useDesigner = create((set)=>({result:null,setResult:(r:any)=>set({result:r})}));
+import { create } from "zustand";
+
+type DesignerState = {
+  result: any;
+  setResult: (result: any) => void;
+};
+
+export const useDesigner = create<DesignerState>((set) => ({
+  result: null,
+  setResult: (result) => set({ result }),
+}));
