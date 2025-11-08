@@ -91,32 +91,44 @@ function SmilesVisualization() {
 
 function EnergiesPropertiesPanel() {
   const { result } = useDesigner();
-  const targets = result?.targets ?? [];
+  const summaries = Array.isArray(result?.property_summary) ? result?.property_summary : [];
+
+  const formatNumber = (value: unknown) => {
+    if (typeof value === "number" && Number.isFinite(value)) {
+      return value.toLocaleString(undefined, { maximumFractionDigits: 3 });
+    }
+    if (value === null || value === undefined || value === "") {
+      return "—";
+    }
+    return String(value);
+  };
 
   return (
     <div className="panel" style={{ overflow: "auto", padding: "10px" }}>
       <h3 style={{ marginTop: 0 }}>Energies / Properties</h3>
-      {targets.length > 0 ? (
+      {summaries.length > 0 ? (
         <table className="table">
           <thead>
             <tr>
               <th>Name</th>
-              <th>Value</th>
+              <th>Sum</th>
+              <th>Doubled</th>
               <th>Units</th>
               <th>Context</th>
             </tr>
           </thead>
           <tbody>
-            {targets.map((target: { kind: string; value: number }, idx: number) => {
-              const meta = PROPERTY_METADATA[target.kind] || {
-                name: target.kind,
+            {summaries.map((summary: { kind: string; sum: number; doubled: number }, idx: number) => {
+              const meta = PROPERTY_METADATA[summary.kind] || {
+                name: summary.kind,
                 units: "—",
                 context: "Target",
               };
               return (
-                <tr key={`${target.kind}-${idx}`}>
+                <tr key={`${summary.kind}-${idx}`}>
                   <td>{meta.name}</td>
-                  <td>{target.value}</td>
+                  <td>{formatNumber(summary.sum)}</td>
+                  <td>{formatNumber(summary.doubled)}</td>
                   <td>{meta.units}</td>
                   <td>{meta.context}</td>
                 </tr>
@@ -125,7 +137,7 @@ function EnergiesPropertiesPanel() {
           </tbody>
         </table>
       ) : (
-        <div style={{ color: "var(--muted)" }}>No property targets submitted yet.</div>
+        <div style={{ color: "var(--muted)" }}>No property summaries available yet.</div>
       )}
       {result?.run && (
         <div style={{ color: "var(--muted)", marginTop: "8px" }}>
