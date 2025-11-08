@@ -49,3 +49,6 @@ server/app/static/
 *.bak
 *.tmp
 *.orig
+
+# TypeScript build info
+*.tsbuildinfo
