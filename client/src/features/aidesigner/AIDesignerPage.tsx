@@ -1,16 +1,19 @@
+import type { KeyboardEvent } from "react";
 import { useDesigner } from "../../state/designerStore";
 
 const PROPERTY_METADATA: Record<string, { name: string; units: string; context: string }> = {
   deltaE_kJmol: { name: "ΔE", units: "kJ/mol", context: "Target" },
-  Mw: { name: "Mw", units: "g/mol", context: "Target" },
-  LogP: { name: "LogP", units: "logP", context: "Target" },
-  TPSA: { name: "TPSA", units: "Å²", context: "Target" },
-  NumRings: { name: "NumRings", units: "count", context: "Target" },
-  NumRotatableBonds: { name: "NumRotatableBonds", units: "count", context: "Target" },
+  MW: { name: "Mw", units: "g/mol", context: "Computed" },
+  LogP: { name: "LogP", units: "logP", context: "Computed" },
+  TPSA: { name: "TPSA", units: "Å²", context: "Computed" },
+  NumRings: { name: "NumRings", units: "count", context: "Computed" },
+  NumRotatableBonds: { name: "NumRotatableBonds", units: "count", context: "Computed" },
 };
 
+const PROPERTY_ORDER = ["MW", "LogP", "TPSA", "NumRings", "NumRotatableBonds"];
+
 function SmilesVisualization() {
-  const { result } = useDesigner();
+  const { result, selectedCandidateIndex, setSelectedCandidateIndex } = useDesigner();
 
   if (!result) {
     return (
@@ -65,50 +68,75 @@ function SmilesVisualization() {
             paddingRight: "4px",
           }}
         >
-          {candidates.map((candidate: any, idx: number) => (
-            <div
-              key={idx}
-              style={{
-                border: "1px solid var(--border)",
-                borderRadius: "6px",
-                padding: "8px",
-                background: "var(--surface-muted)",
-              }}
-            >
-              <div style={{ fontWeight: 600, marginBottom: "4px" }}>Candidate #{idx + 1}</div>
-              <div style={{ display: "grid", gap: "4px" }}>
-                <div>
-                  <span style={{ color: "var(--muted)", fontSize: "12px" }}>Monomer</span>
-                  <code
-                    style={{
-                      display: "block",
-                      maxWidth: "100%",
-                      overflow: "auto",
-                      whiteSpace: "pre",
-                    }}
-                  >
-                    {candidate.monomer?.smiles || "—"}
-                  </code>
-                </div>
-                <div>
-                  <span style={{ color: "var(--muted)", fontSize: "12px" }}>Linker</span>
-                  <code
-                    style={{
-                      display: "block",
-                      maxWidth: "100%",
-                      overflow: "auto",
-                      whiteSpace: "pre",
-                    }}
-                  >
-                    {candidate.linker?.smiles || "—"}
-                  </code>
-                </div>
-                <div style={{ color: "var(--muted)", fontSize: "12px" }}>
-                  Estimated ΔE ≈ {candidate.estimated_deltaE_kJmol ?? "—"} kJ/mol
+          {candidates.map((candidate: any, idx: number) => {
+            const isSelected = idx === selectedCandidateIndex;
+            const borderColor = isSelected ? "var(--primary)" : "var(--border)";
+            const background = isSelected ? "var(--surface)" : "var(--surface-muted)";
+
+            const handleSelect = () => {
+              setSelectedCandidateIndex(idx);
+            };
+
+            const handleKeyDown = (evt: KeyboardEvent<HTMLDivElement>) => {
+              if (evt.key === "Enter" || evt.key === " ") {
+                evt.preventDefault();
+                handleSelect();
+              }
+            };
+
+            return (
+              <div
+                key={idx}
+                role="button"
+                tabIndex={0}
+                onClick={handleSelect}
+                onKeyDown={handleKeyDown}
+                aria-pressed={isSelected}
+                style={{
+                  border: `2px solid ${borderColor}`,
+                  borderRadius: "8px",
+                  padding: "8px",
+                  background,
+                  cursor: "pointer",
+                  outline: "none",
+                  transition: "border-color 0.15s ease, background 0.15s ease",
+                }}
+              >
+                <div style={{ fontWeight: 600, marginBottom: "4px" }}>Candidate #{idx + 1}</div>
+                <div style={{ display: "grid", gap: "4px" }}>
+                  <div>
+                    <span style={{ color: "var(--muted)", fontSize: "12px" }}>Monomer</span>
+                    <code
+                      style={{
+                        display: "block",
+                        maxWidth: "100%",
+                        overflow: "auto",
+                        whiteSpace: "pre",
+                      }}
+                    >
+                      {candidate.monomer?.smiles || "—"}
+                    </code>
+                  </div>
+                  <div>
+                    <span style={{ color: "var(--muted)", fontSize: "12px" }}>Linker</span>
+                    <code
+                      style={{
+                        display: "block",
+                        maxWidth: "100%",
+                        overflow: "auto",
+                        whiteSpace: "pre",
+                      }}
+                    >
+                      {candidate.linker?.smiles || "—"}
+                    </code>
+                  </div>
+                  <div style={{ color: "var(--muted)", fontSize: "12px" }}>
+                    Estimated ΔE ≈ {candidate.estimated_deltaE_kJmol ?? "—"} kJ/mol
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
           {candidates.length === 0 && (
             <div style={{ color: "var(--muted)" }}>No candidates returned yet.</div>
           )}
@@ -118,9 +146,31 @@ function SmilesVisualization() {
   );
 }
 
-function EnergiesPropertiesPanel() {
-  const { result } = useDesigner();
+function CandidatePropertiesPanel() {
+  const { result, selectedCandidateIndex } = useDesigner();
   const summaries = Array.isArray(result?.property_summary) ? result?.property_summary : [];
+  const candidates = Array.isArray(result?.candidates) ? result?.candidates : [];
+
+  const selectedCandidate =
+    typeof selectedCandidateIndex === "number" &&
+    selectedCandidateIndex >= 0 &&
+    selectedCandidateIndex < candidates.length
+      ? candidates[selectedCandidateIndex]
+      : null;
+
+  const properties =
+    selectedCandidate &&
+    selectedCandidate.properties &&
+    typeof selectedCandidate.properties === "object"
+      ? (selectedCandidate.properties as Record<string, unknown>)
+      : null;
+
+  const selectedCandidateLabel =
+    typeof selectedCandidateIndex === "number"
+      ? selectedCandidateIndex + 1
+      : selectedCandidate
+      ? Math.max(1, candidates.indexOf(selectedCandidate) + 1)
+      : null;
 
   const formatNumber = (value: unknown) => {
     if (typeof value === "number" && Number.isFinite(value)) {
@@ -134,7 +184,81 @@ function EnergiesPropertiesPanel() {
 
   return (
     <div className="panel" style={{ overflow: "auto", padding: "10px" }}>
-      <h3 style={{ marginTop: 0 }}>Energies / Properties</h3>
+      <h3 style={{ marginTop: 0 }}>Candidate Properties</h3>
+      {selectedCandidate ? (
+        <div style={{ display: "grid", gap: "8px" }}>
+          <div style={{ fontWeight: 600 }}>
+            Candidate #{selectedCandidateLabel ?? "—"}
+          </div>
+          <div>
+            <span style={{ color: "var(--muted)", fontSize: "12px" }}>SMILES</span>
+            <code
+              style={{
+                display: "block",
+                padding: "8px",
+                background: "var(--surface-muted)",
+                borderRadius: "6px",
+                overflow: "auto",
+                whiteSpace: "pre-wrap",
+              }}
+            >
+              {selectedCandidate.smiles || "—"}
+            </code>
+          </div>
+          {properties ? (
+            <table className="table">
+              <thead>
+                <tr>
+                  <th>Property</th>
+                  <th>Value</th>
+                  <th>Units</th>
+                  <th>Context</th>
+                </tr>
+              </thead>
+              <tbody>
+                {PROPERTY_ORDER.flatMap((key) => {
+                  const value = properties[key];
+                  if (value === undefined || value === null || value === "") {
+                    return [];
+                  }
+                  const meta = PROPERTY_METADATA[key] || {
+                    name: key,
+                    units: "—",
+                    context: "Computed",
+                  };
+                  return [
+                    <tr key={key}>
+                      <td>{meta.name}</td>
+                      <td>{formatNumber(value)}</td>
+                      <td>{meta.units}</td>
+                      <td>{meta.context}</td>
+                    </tr>,
+                  ];
+                })}
+                {Object.entries(properties)
+                  .filter(([key]) => !PROPERTY_ORDER.includes(key))
+                  .map(([key, value]) => (
+                    <tr key={key}>
+                      <td>{PROPERTY_METADATA[key]?.name ?? key}</td>
+                      <td>{formatNumber(value)}</td>
+                      <td>{PROPERTY_METADATA[key]?.units ?? "—"}</td>
+                      <td>{PROPERTY_METADATA[key]?.context ?? "Computed"}</td>
+                    </tr>
+                  ))}
+              </tbody>
+            </table>
+          ) : (
+            <div style={{ color: "var(--muted)" }}>
+              No computed properties available for this candidate.
+            </div>
+          )}
+        </div>
+      ) : (
+        <div style={{ color: "var(--muted)" }}>
+          Select a candidate from the list to view its computed properties.
+        </div>
+      )}
+      <h4 style={{ marginTop: "16px", marginBottom: "4px" }}>Aggregate Summary</h4>
       {summaries.length > 0 ? (
         <table className="table">
           <thead>
@@ -234,7 +358,7 @@ export default function AIDesignerPage() {
           </div>
         </div>
       </div>
-      <EnergiesPropertiesPanel />
+      <CandidatePropertiesPanel />
     </div>
   );
 }
