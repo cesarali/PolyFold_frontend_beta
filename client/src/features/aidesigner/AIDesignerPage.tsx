@@ -1,4 +1,5 @@
 import type { KeyboardEvent } from "react";
+import ResizableVerticalPanels from "../../components/ResizablePanels";
 import { useDesigner } from "../../state/designerStore";
 
 const PROPERTY_METADATA: Record<string, { name: string; units: string; context: string }> = {
@@ -183,7 +184,7 @@ function CandidatePropertiesPanel() {
   };
 
   return (
-    <div className="panel" style={{ overflow: "auto", padding: "10px" }}>
+    <div className="panel" style={{ overflow: "auto", padding: "10px", height: "100%" }}>
       <h3 style={{ marginTop: 0 }}>Candidate Properties</h3>
       {selectedCandidate ? (
         <div style={{ display: "grid", gap: "8px" }}>
@@ -303,62 +304,62 @@ function CandidatePropertiesPanel() {
 
 export default function AIDesignerPage() {
   return (
-    <div
-      style={{
-        display: "grid",
-        gridTemplateRows: "minmax(0, 1fr) 260px",
-        gap: "12px",
-        height: "100%",
-        minHeight: 0,
-      }}
-    >
-      <div
-        className="panel"
-        style={{
-          overflow: "hidden",
-          display: "grid",
-          gridTemplateRows: "40px 1fr",
-          minHeight: 0,
-        }}
-      >
+    <ResizableVerticalPanels
+      initialTopRatio={0.65}
+      minTopRatio={0.2}
+      minBottomRatio={0.2}
+      gap={12}
+      handleLabel="Resize SMILES and properties panels"
+      top={
         <div
+          className="panel"
           style={{
-            padding: "6px 10px",
-            borderBottom: "1px solid var(--border)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-          }}
-        >
-          <strong>SMILES Visualization</strong>
-        </div>
-        <div
-          style={{
-            padding: "12px",
+            overflow: "hidden",
             display: "grid",
-            gridTemplateColumns: "minmax(0, 1fr)",
+            gridTemplateRows: "40px 1fr",
             minHeight: 0,
             height: "100%",
           }}
         >
           <div
             style={{
-              border: "1px solid var(--border)",
-              borderRadius: "8px",
-              padding: "12px",
-              background: "var(--surface)",
-              minHeight: 0,
+              padding: "6px 10px",
+              borderBottom: "1px solid var(--border)",
               display: "flex",
-              flexDirection: "column",
-              height: "100%",
-              overflow: "hidden",
+              alignItems: "center",
+              justifyContent: "space-between",
             }}
           >
-            <SmilesVisualization />
+            <strong>SMILES Visualization</strong>
+          </div>
+          <div
+            style={{
+              padding: "12px",
+              display: "grid",
+              gridTemplateColumns: "minmax(0, 1fr)",
+              minHeight: 0,
+              height: "100%",
+            }}
+          >
+            <div
+              style={{
+                border: "1px solid var(--border)",
+                borderRadius: "8px",
+                padding: "12px",
+                background: "var(--surface)",
+                minHeight: 0,
+                display: "flex",
+                flexDirection: "column",
+                height: "100%",
+                overflow: "hidden",
+              }}
+            >
+              <SmilesVisualization />
+            </div>
           </div>
         </div>
-      </div>
-      <CandidatePropertiesPanel />
-    </div>
+      }
+      bottom={<CandidatePropertiesPanel />}
+    />
   );
 }

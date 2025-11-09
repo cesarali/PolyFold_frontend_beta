@@ -16,3 +16,7 @@ a{color:var(--accent);text-decoration:none} a.active{color:var(--accent-2)}
 .btn{background:transparent;color:var(--text);border:1px solid var(--border);padding:6px 10px;border-radius:8px;cursor:pointer}
 .btn:hover{border-color:var(--accent)} .input{background:transparent;color:var(--text);border:1px solid var(--border);padding:8px;border-radius:8px}
 .table{width:100%;border-collapse:collapse}.table th,.table td{padding:6px 8px;border-bottom:1px solid var(--border)} .table th{text-align:left;color:var(--muted);font-weight:600}
+.resizable-vertical-panels__handle{cursor:row-resize;background:var(--border);border-radius:999px;position:relative;touch-action:none;transition:background-color 0.15s ease}
+.resizable-vertical-panels__handle::after{content:"";position:absolute;left:50%;top:50%;width:36px;height:2px;border-radius:2px;background:var(--muted);transform:translate(-50%,-50%);opacity:0.75}
+.resizable-vertical-panels__handle:hover,.resizable-vertical-panels__handle:focus-visible{background:var(--accent)}
+.resizable-vertical-panels__handle.dragging{background:var(--accent-2)}
