@@ -44,6 +44,8 @@ server/app/static/
 # Ignore Windows NTFS Zone.Identifier metadata streams
 *Zone.Identifier
 
+OPEN_AI_KEY.txt
+
 # --------------------------------------------------
 # Miscellaneous
 # --------------------------------------------------
