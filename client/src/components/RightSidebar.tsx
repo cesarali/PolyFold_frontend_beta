@@ -56,9 +56,9 @@ export default function RightSidebar() {
       <div
         style={{
           display: "grid",
-          gridTemplateRows: "auto 1fr",
+          gridTemplateRows: copilotCollapsed ? "auto" : "auto 1fr",
           minHeight: 0,
-          height: "100%",
+          height: copilotCollapsed ? "auto" : "100%",
         }}
       >
         <div
@@ -75,25 +75,16 @@ export default function RightSidebar() {
             {copilotCollapsed ? "Expand" : "Collapse"}
           </button>
         </div>
-        <div
-          style={{
-            minHeight: 0,
-            height: "100%",
-            overflow: copilotCollapsed ? "hidden" : "visible",
-            display: copilotCollapsed ? "flex" : "block",
-            alignItems: copilotCollapsed ? "center" : undefined,
-            justifyContent: copilotCollapsed ? "center" : undefined,
-            padding: copilotCollapsed ? PANEL_PADDING : 0,
-          }}
-        >
-          {copilotCollapsed ? (
-            <div style={{ color: "var(--muted)", textAlign: "center" }}>
-              Copilot is collapsed.
-            </div>
-          ) : (
+        {!copilotCollapsed && (
+          <div
+            style={{
+              minHeight: 0,
+              height: "100%",
+            }}
+          >
             <Copilot collapsed={copilotCollapsed} />
-          )}
-        </div>
+          </div>
+        )}
       </div>
     );
 
@@ -109,6 +100,7 @@ export default function RightSidebar() {
       handleLabel="Resize controls and Copilot panels"
       top={controlsContent}
       bottom={copilotContent}
+      bottomCollapsed={copilotCollapsed}
     />
   );
 }
