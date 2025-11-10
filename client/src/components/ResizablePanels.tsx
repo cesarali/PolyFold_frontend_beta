@@ -16,6 +16,8 @@ interface ResizableVerticalPanelsProps {
   style?: CSSProperties;
   /** Accessible label for the resize handle. */
   handleLabel?: string;
+  /** When true, the bottom panel collapses to its natural height. */
+  bottomCollapsed?: boolean;
 }
 
 const clamp = (value: number, min: number, max: number) => Math.min(max, Math.max(min, value));
@@ -30,6 +32,7 @@ export default function ResizableVerticalPanels({
   className,
   style,
   handleLabel = "Resize panels",
+  bottomCollapsed = false,
 }: ResizableVerticalPanelsProps) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const minTop = clamp(minTopRatio, 0, 0.9);
@@ -130,31 +133,35 @@ export default function ResizableVerticalPanels({
     ...style,
   };
 
+  const topFlexStyle: CSSProperties = bottomCollapsed
+    ? { flex: "1 1 auto", minHeight: 0 }
+    : { flex: `${topRatio} 1 0`, minHeight: 0 };
+
+  const bottomFlexStyle: CSSProperties = bottomCollapsed
+    ? { flex: "0 0 auto", minHeight: "auto" }
+    : { flex: `${1 - topRatio} 1 0`, minHeight: 0 };
+
   return (
     <div ref={containerRef} className={containerClassName} style={baseStyle}>
-      <div
-        className="resizable-vertical-panels__top"
-        style={{ flex: `${topRatio} 1 0`, minHeight: 0 }}
-      >
+      <div className="resizable-vertical-panels__top" style={topFlexStyle}>
         {top}
       </div>
-      <div
-        role="separator"
-        aria-orientation="horizontal"
-        aria-label={handleLabel}
-        aria-valuenow={Math.round(topRatio * 100)}
-        aria-valuemin={Math.round(minTop * 100)}
-        aria-valuemax={Math.round((1 - minBottom) * 100)}
-        tabIndex={0}
-        className={`resizable-vertical-panels__handle${isDragging ? " dragging" : ""}`}
-        onPointerDown={handlePointerDown}
-        onKeyDown={handleKeyDown}
-        style={{ height: handleThickness, margin: `${handleMargin}px 0` }}
-      />
-      <div
-        className="resizable-vertical-panels__bottom"
-        style={{ flex: `${1 - topRatio} 1 0`, minHeight: 0 }}
-      >
+      {!bottomCollapsed && (
+        <div
+          role="separator"
+          aria-orientation="horizontal"
+          aria-label={handleLabel}
+          aria-valuenow={Math.round(topRatio * 100)}
+          aria-valuemin={Math.round(minTop * 100)}
+          aria-valuemax={Math.round((1 - minBottom) * 100)}
+          tabIndex={0}
+          className={`resizable-vertical-panels__handle${isDragging ? " dragging" : ""}`}
+          onPointerDown={handlePointerDown}
+          onKeyDown={handleKeyDown}
+          style={{ height: handleThickness, margin: `${handleMargin}px 0` }}
+        />
+      )}
+      <div className="resizable-vertical-panels__bottom" style={bottomFlexStyle}>
         {bottom}
       </div>
     </div>
