@@ -1,48 +1,114 @@
+import { useMemo } from "react";
 import { useLocation } from "react-router-dom";
+import ResizableVerticalPanels from "./ResizablePanels";
 import PdfControls from "../features/literature/PdfControls";
 import DesignerControls from "../features/aidesigner/DesignerControls";
 import PhysicsControls from "../features/physics/PhysicsControls";
 import Copilot from "./copilot/Copilot";
 import { useUI } from "../state/uiStore";
 
+const PANEL_PADDING = "10px";
+
 export default function RightSidebar() {
   const { pathname } = useLocation();
   const { copilotCollapsed, toggleCopilot } = useUI();
 
-  const isLit = pathname === "/" || pathname.startsWith("/literature") || pathname.startsWith("/literature-review");
-  const isAI  = pathname.startsWith("/ai-designer");
-  const isPE  = pathname.startsWith("/physics") || pathname.startsWith("/physics-engine");
+  const { controlsContent, copilotContent } = useMemo(() => {
+    const isLit =
+      pathname === "/" ||
+      pathname.startsWith("/literature") ||
+      pathname.startsWith("/literature-review");
+    const isAI = pathname.startsWith("/ai-designer");
+    const isPE = pathname.startsWith("/physics") || pathname.startsWith("/physics-engine");
 
-  return (
-    <div style={{display:"grid", gridTemplateRows:"auto auto 1fr", height:"100%"}}>
-      {/* Controls */}
-      <div style={{borderBottom:"1px solid var(--border)", padding:"8px 10px"}}>
-        <h4 style={{margin:"6px 0"}}>Controls</h4>
-        {isLit && <PdfControls/>}
-        {isAI  && <DesignerControls/>}
-        {isPE  && <PhysicsControls/>}
-      </div>
-
-      {/* Copilot header */}
-      <div style={{display:"flex", alignItems:"center", justifyContent:"space-between", padding:"8px 10px",
-                   borderBottom:"1px solid var(--border)"}}>
-        <strong>Copilot</strong>
-        <button className="btn" onClick={toggleCopilot}>
-          {copilotCollapsed ? "Expand" : "Collapse"}
-        </button>
-      </div>
-
-      {/* Copilot body ALWAYS mounted; just collapse via height */}
+    const controls = (
       <div
         style={{
-          height: copilotCollapsed ? 0 : "100%",
+          display: "grid",
+          gridTemplateRows: "auto 1fr",
           minHeight: 0,
-          overflow: copilotCollapsed ? "hidden" : "visible",
-          transition: "height 160ms ease",
+          height: "100%",
         }}
       >
-        <Copilot collapsed={copilotCollapsed} />
+        <div
+          style={{
+            padding: "8px 10px",
+            borderBottom: "1px solid var(--border)",
+          }}
+        >
+          <h4 style={{ margin: "6px 0" }}>Controls</h4>
+        </div>
+        <div
+          style={{
+            padding: PANEL_PADDING,
+            overflowY: "auto",
+            minHeight: 0,
+          }}
+        >
+          {isLit && <PdfControls />}
+          {isAI && <DesignerControls />}
+          {isPE && <PhysicsControls />}
+        </div>
       </div>
-    </div>
+    );
+
+    const copilotSection = (
+      <div
+        style={{
+          display: "grid",
+          gridTemplateRows: "auto 1fr",
+          minHeight: 0,
+          height: "100%",
+        }}
+      >
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            padding: "8px 10px",
+            borderBottom: "1px solid var(--border)",
+          }}
+        >
+          <strong>Copilot</strong>
+          <button className="btn" onClick={toggleCopilot}>
+            {copilotCollapsed ? "Expand" : "Collapse"}
+          </button>
+        </div>
+        <div
+          style={{
+            minHeight: 0,
+            height: "100%",
+            overflow: copilotCollapsed ? "hidden" : "visible",
+            display: copilotCollapsed ? "flex" : "block",
+            alignItems: copilotCollapsed ? "center" : undefined,
+            justifyContent: copilotCollapsed ? "center" : undefined,
+            padding: copilotCollapsed ? PANEL_PADDING : 0,
+          }}
+        >
+          {copilotCollapsed ? (
+            <div style={{ color: "var(--muted)", textAlign: "center" }}>
+              Copilot is collapsed.
+            </div>
+          ) : (
+            <Copilot collapsed={copilotCollapsed} />
+          )}
+        </div>
+      </div>
+    );
+
+    return { controlsContent: controls, copilotContent: copilotSection };
+  }, [copilotCollapsed, pathname, toggleCopilot]);
+
+  return (
+    <ResizableVerticalPanels
+      initialTopRatio={0.45}
+      minTopRatio={0.2}
+      minBottomRatio={0.25}
+      gap={12}
+      handleLabel="Resize controls and Copilot panels"
+      top={controlsContent}
+      bottom={copilotContent}
+    />
   );
 }
