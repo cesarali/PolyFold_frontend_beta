@@ -24,7 +24,7 @@ export default function App() {
     if (event.key === "ArrowLeft" || event.key === "ArrowRight") {
       event.preventDefault();
       setRightWidth((current) => {
-        const delta = event.key === "ArrowRight" ? HANDLE_STEP : -HANDLE_STEP;
+        const delta = event.key === "ArrowRight" ? -HANDLE_STEP : HANDLE_STEP;
         return clamp(current + delta, MIN_RIGHT_WIDTH, MAX_RIGHT_WIDTH);
       });
     }
@@ -33,7 +33,7 @@ export default function App() {
   const updateWidth = useCallback((clientX: number) => {
     const delta = clientX - startXRef.current;
     const nextWidth = clamp(
-      startWidthRef.current + delta,
+      startWidthRef.current - delta,
       MIN_RIGHT_WIDTH,
       MAX_RIGHT_WIDTH,
     );
